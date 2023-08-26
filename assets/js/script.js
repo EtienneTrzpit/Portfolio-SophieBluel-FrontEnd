@@ -381,6 +381,14 @@ formImg.addEventListener("submit", async (e) => {
       window.location.reload();
     }
   }
+
+  //afficher paragraphe requirement si le champ image est vide
+  if (document.querySelector("#image").value === "") {
+    let typeFile = document.createElement("p");
+    typeFile.textContent = "jpg, png : 4mo max";
+    typeFile.classList.add("requirement");
+    document.querySelector(".photo-to-add").appendChild(typeFile);
+  }
 });
 
 //fonction pour changer photos du modal en fonction de ce qu'affiche la gallerie
