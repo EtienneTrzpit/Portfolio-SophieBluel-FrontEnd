@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<title>Sophie Bluel - Architecte d'intérieur</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap"
+			rel="stylesheet">
+		<meta name="description" content>
+		<link rel="stylesheet" href="./assets/style.css">
+		<script src="https://kit.fontawesome.com/a2d50acec4.js"
+			crossorigin="anonymous"></script>
+		<script src="assets/js/script.js" async></script>
+	</head>
+	<body>
+		<header>
+			<div class="edit">
+				<i class="fa-solid fa-pen-to-square"></i>
+				<p>Mode édition</p>
+				<button class="publication">publier les changements</button>
+			</div>
+			<div class="header">
+				<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
+				<nav>
+					<ul>
+						<li class="menu">projets</li>
+						<li class="menu">contact</li>
+						<li><a href="login.html" class="login-link login menu index">login</a></li>
+						<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
+					</ul>
+				</nav>
+			</div>
+		</header>
+		<main>
+			<section id="introduction">
+				<figure>
+					<img src="./assets/images/sophie-bluel.png" alt>
+				</figure>
+				<article>
+					<h2>Designer d'espace</h2>
+					<p>Je raconte votre histoire, je valorise vos idées. Je vous accompagne de
+						la conception à la livraison finale du chantier.</p>
+					<p>Chaque projet sera étudié en commun, de façon à mettre en valeur les
+						volumes, les matières et les couleurs dans le respect de l’esprit des
+						lieux et le choix adapté des matériaux. Le suivi du chantier sera assuré
+						dans le souci du détail, le respect du planning et du budget.</p>
+					<p>En cas de besoin, une équipe pluridisciplinaire peut-être constituée :
+						architecte DPLG, décorateur(trice)</p>
+				</article>
+			</section>
+			<section id="portfolio">
+				<h2>Mes Projets</h2>
+				<ol class="project-filter">
+					<li class="type all">Tous</li>
+					<li class="type object">Objets</li>
+					<li class="type tenement">Appartements</li>
+					<li class="type hotel">Hôtels & restaurants</li>
+				</ol>
+				<div class="gallery">
+				</div>
+			</section>
+			<section id="contact">
+				<h2>Contact</h2>
+				<p>Vous avez un projet ? Discutons-en !</p>
+				<form action="#" method="post">
+					<label for="name">Nom</label>
+					<input type="text" name="name" id="name">
+					<label for="email">Email</label>
+					<input type="email" name="email" id="email">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" cols="30" rows="10"></textarea>
+					<input type="submit" value="Envoyer">
+				</form>
+			</section>
+		</main>
+		<aside class="modal-display">
+			<dialog class="modal">
+				<!-- xmark -->
+				<button class="close close1"><i class="fa-solid fa-xmark"></i></button>
+				<h2>Galerie photo</h2>
+				<div class="photos"></div>
+				<hr class="separator">
+				<button class="add">Ajouter une photo</button>
+				<button class="delete">Supprimer la gallerie</button>
+			</dialog>
+			<dialog class="modal-add">
+				<div class="modal-add-top">
+					<button class="close back"><i class="fa-solid fa-arrow-left"></i></button>
+					<button class="close close2"><i class="fa-solid fa-xmark"></i></button>
+				</div>
+				<h2 class="modal-add-title">Ajout photo</h2>
+				<form class="form-image">
+					<div class="photo-to-add">
+						<i class="fa-solid fa-image fa-2xl"></i>
+						<label for="image" class="form-info--label">+ Ajouter photo</label>
+						<input type="file" name="image" id="image">
+						<p class="requirement">jpg, png : 4mo max</p>
+					</div>
+					<label for="title">Titre</label>
+					<input type="text" name="title" id="title">
+					<label for="category">Catégorie</label>
+					<select name="category" id="category">
+						<option hidden selected value>&#160;</option>
+						<option value="object">Objets</option>
+						<option value="tenement">Appartements</option>
+						<option value="hotel">Hôtels & restaurants</option>
+					</select>
+					<hr class="separator">
+					<input type="submit" value="Valider" class="validation-add">
+				</form>
+			</dialog>
+		</aside>
+		<footer class="bottom__home">
+			<nav>
+				<ul>
+					<li>Mentions Légales</li>
+				</ul>
+			</nav>
+		</footer>
+	</body>
+</html>
