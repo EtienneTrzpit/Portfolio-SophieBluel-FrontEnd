@@ -321,6 +321,11 @@ formImg.addEventListener("submit", async (e) => {
   let error;
   let file = document.querySelector("#image").files[0];
   let limit = 4000000;
+  let errorEmpty = document.querySelector(".errorEmpty");
+  console.log(errorEmpty);
+  if (errorEmpty) {
+    errorEmpty.remove();
+  }
   if (
     file === undefined ||
     document.querySelector("#title").value === "" ||
@@ -330,12 +335,8 @@ formImg.addEventListener("submit", async (e) => {
     error = document.createElement("p");
     error.textContent = "Veuillez remplir tous les champs";
     error.style.color = "red";
+    error.classList.add("errorEmpty");
     document.querySelector(".modal-add").appendChild(error);
-    // supprimer message d'erreur s'il existe
-    let precedentError = document.querySelector(".modal-add p");
-    if (precedentError) {
-      precedentError.remove();
-    }
   } else {
     let size = file.size / 1024;
     // supprimer message d'erreur s'il existe
@@ -383,7 +384,10 @@ formImg.addEventListener("submit", async (e) => {
   }
 
   //afficher paragraphe requirement si le champ image est vide
-  if (document.querySelector("#image").value === "") {
+  if (
+    document.querySelector("#image").value === "" &&
+    !document.querySelector(".errorEmpty")
+  ) {
     let typeFile = document.createElement("p");
     typeFile.textContent = "jpg, png : 4mo max";
     typeFile.classList.add("requirement");
