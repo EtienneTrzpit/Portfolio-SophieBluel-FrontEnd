@@ -34,7 +34,7 @@ async function createFilters() {
     .insertBefore(list, document.querySelector(".gallery"));
   // création du filtre all
   let li = document.createElement("li");
-  li.classList.add("type", "all");
+  li.classList.add("type", "all", "highlight");
   li.textContent = "Tous";
   list.appendChild(li);
   // boucle de création de tous les filtres dans l'API
@@ -47,17 +47,13 @@ async function createFilters() {
 }
 
 async function highlightCategory(type) {
-  type.style.backgroundColor = "#1D6154";
-  type.style.color = "white";
-  if (typeClass !== type.classList[1]) {
-    document.querySelector(`.${typeClass}`).style.backgroundColor = "white";
-    document.querySelector(`.${typeClass}`).style.color = "#1D6154";
-  }
-  //mémoriser la classe du type sélectionné
-  typeClass = type.classList[1];
+  //trouver l'élément avec la classe highlight
+  let highlight = document.querySelector(".highlight");
+  //supprimer la classe highlight
+  highlight.classList.remove("highlight");
+  //ajouter la classe highlight à l'élément cliqué
+  type.classList.add("highlight");
 }
-
-//fonction pour afficher les travaux avec comme paramètre la ou les catégories à afficher
 
 async function displayGallery() {
   //suppression des travaux de la gallerie si ils existent
@@ -91,6 +87,8 @@ async function addEventListenerToFilters() {
       if (type.textContent === "Tous") {
         //afficher tous les travaux
         displayGallery();
+        //colorer le filtre tous
+        highlightCategory(type);
       } else {
         //afficher les travaux selon la catégorie sélectionnée
         displayCategory(type.textContent);
@@ -123,28 +121,6 @@ async function displayCategory(category) {
     }
   }
 }
-
-/*
-object.addEventListener("click", () => {
-  displayCategory(1);
-  //colorer la catégorie sélectionnée
-  highlightCategory(object);
-});
-
-tenement.addEventListener("click", () => {
-  displayCategory(2);
-  highlightCategory(tenement);
-});
-
-hotel.addEventListener("click", () => {
-  displayCategory(3);
-  highlightCategory(hotel);
-});
-
-all.addEventListener("click", () => {
-  displayCategory();
-  highlightCategory(all);
-});*/
 
 async function modificationUser() {
   //ajout d'un event listener sur icone fontawesome pen to square

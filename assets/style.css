@@ -173,6 +173,7 @@ nav li {
 li:hover {
   color: #b1663c;
 }
+
 #introduction {
   display: flex;
   align-items: center;
@@ -284,10 +285,6 @@ input[type="submit"] {
   border: 1px solid #1d6154;
   padding: 0.5em 1em;
   cursor: pointer;
-}
-
-.type:hover {
-  color: #1d6154;
 }
 
 .login {
@@ -678,7 +675,7 @@ input[type="file"] {
   font-weight: bold;
 }
 
-.all {
+.highlight {
   background-color: #1d6154;
   color: white;
 }
