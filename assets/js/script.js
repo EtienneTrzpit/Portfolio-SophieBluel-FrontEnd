@@ -6,68 +6,44 @@ const hotel = document.querySelector(".hotel");
 const modal = document.querySelector(".modal");
 const modalAdd = document.querySelector(".modal-add");
 localStorage.getItem("token");
-let idWorks = [];
-let titleWorks = [];
-let imageUrlWorks = [];
-let categoryWorks = [];
-let numberofWorks = 0;
 let typeClass = "all";
+let works;
+let categories;
 
 //fonction pour récupérer les travaux de l'utilisateur et stockage des données par des variables
 async function fetchWorks() {
   const response = await fetch("http://localhost:5678/api/works");
-  const json = await response.json();
-  Object.entries(json).forEach(([key, value]) => {
-    //création d'une variable pour stocker les id des travaux
-    idWorks.push(value.id);
-    //création d'une variable pour stocker les titres des travaux
-    titleWorks.push(value.title);
-    //création d'une variable pour stocker les url des travaux
-    imageUrlWorks.push(value.imageUrl);
-    //création d'une variable pour stocker les catégories des travaux
-    categoryWorks.push(value.categoryId);
-    numberofWorks++;
-  });
+  works = await response.json();
+  // récupérer la liste des categories
+  const response2 = await fetch("http://localhost:5678/api/categories");
+  categories = await response2.json();
+  // création des filtres puis affichage des travaux dans la gallerie
+  createFilters();
+  displayGallery();
+  addEventListenerToFilters();
 }
 
-async function fetchWorksModal() {
-  let photos = document.querySelector(".photos");
-  const response = await fetch("http://localhost:5678/api/works");
-  const json = await response.json();
-  Object.entries(json).forEach(([key, value]) => {
-    let figure = document.createElement("figure");
-    let img = document.createElement("img");
-    let figcaption = document.createElement("figcaption");
-    let trash = document.createElement("i");
-    trash.classList.add("fas", "fa-trash-alt", "fa-2xs");
-    trash.id = value.id;
-    img.src = value.imageUrl;
-    img.alt = value.title;
-    figcaption.textContent = "éditer";
-    figure.appendChild(trash);
-    figure.appendChild(img);
-    figure.appendChild(figcaption);
-    photos.appendChild(figure);
-  });
-}
-
-fetchWorksModal();
-
-//fonction pour trouver id d'une categorie
-function findIdCategory(category) {
-  let idCategory = 0;
-  switch (category) {
-    case "object":
-      idCategory = 1;
-      break;
-    case "tenement":
-      idCategory = 2;
-      break;
-    case "hotel":
-      idCategory = 3;
-      break;
+// fonction pour créer les filtres
+async function createFilters() {
+  // création d'une liste pour les filtres
+  let list = document.createElement("ul");
+  list.classList.add("project-filter");
+  //insertion de la liste avant la gallerie
+  document
+    .querySelector("#portfolio")
+    .insertBefore(list, document.querySelector(".gallery"));
+  // création du filtre all
+  let li = document.createElement("li");
+  li.classList.add("type", "all");
+  li.textContent = "Tous";
+  list.appendChild(li);
+  // boucle de création de tous les filtres dans l'API
+  for (let i = 0; i < categories.length; i++) {
+    let li = document.createElement("li");
+    li.classList.add("type");
+    li.textContent = categories[i].name;
+    list.appendChild(li);
   }
-  return idCategory;
 }
 
 async function highlightCategory(type) {
@@ -83,47 +59,72 @@ async function highlightCategory(type) {
 
 //fonction pour afficher les travaux avec comme paramètre la ou les catégories à afficher
 
-async function displayCategory(...category) {
-  // suppresion de la gallerie
-  document.querySelector(".gallery").remove();
-  // création d'une nouvelle gallerie
-  let newGallery = document.createElement("div");
-  newGallery.classList.add("gallery");
-  document.querySelector("#portfolio").appendChild(newGallery);
+async function displayGallery() {
+  //suppression des travaux de la gallerie si ils existent
+  document.querySelectorAll(".gallery figure").forEach((figure) => {
+    figure.remove();
+  });
+  let gallery = document.querySelector(".gallery");
   // boucle pour afficher les travaux
-  for (let i = 0; i < numberofWorks; i++) {
-    // afficher tous les travaux si aucun paramètre n'est passé
-    if (category.length === 0) {
-      let figure = document.createElement("figure");
-      let img = document.createElement("img");
-      let figcaption = document.createElement("figcaption");
-      img.src = imageUrlWorks[i];
-      img.alt = titleWorks[i];
-      figcaption.textContent = titleWorks[i];
-      figure.appendChild(img);
-      figure.appendChild(figcaption);
-      newGallery.appendChild(figure);
-    } else {
-      // afficher les travaux selon la ou les catégories passées en paramètre
-      if (categoryWorks[i] === category[0]) {
-        let figure = document.createElement("figure");
-        let img = document.createElement("img");
-        let figcaption = document.createElement("figcaption");
-        img.src = imageUrlWorks[i];
-        img.alt = titleWorks[i];
-        figcaption.textContent = titleWorks[i];
-        figure.appendChild(img);
-        figure.appendChild(figcaption);
-        newGallery.appendChild(figure);
-      }
-    }
+  for (let i = 0; i < works.length; i++) {
+    // afficher tous les travaux
+    let figure = document.createElement("figure");
+    let img = document.createElement("img");
+    let figcaption = document.createElement("figcaption");
+    img.src = works[i].imageUrl;
+    img.alt = works[i].title;
+    figcaption.textContent = works[i].title;
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    gallery.appendChild(figure);
   }
   changePhotosModal(...category);
 }
 
 //appel de la fonction pour afficher tous les travaux
-fetchWorks().then(() => displayCategory());
+fetchWorks();
 
+/*fonction pour les event listeners sur les filtres*/
+async function addEventListenerToFilters() {
+  document.querySelectorAll(".type").forEach((type) => {
+    type.addEventListener("click", () => {
+      if (type.textContent === "Tous") {
+        //afficher tous les travaux
+        displayGallery();
+      } else {
+        //afficher les travaux selon la catégorie sélectionnée
+        displayCategory(type.textContent);
+        //colorer la catégorie sélectionnée
+        highlightCategory(type);
+      }
+    });
+  });
+}
+
+//fonction pour afficher les travaux selon la catégorie sélectionnée
+async function displayCategory(category) {
+  //suppression des travaux de la gallerie
+  document.querySelectorAll(".gallery figure").forEach((figure) => {
+    figure.remove();
+  });
+  // boucle pour afficher les travaux
+  for (let i = 0; i < works.length; i++) {
+    //compare la catégorie du travail avec la catégorie sélectionnée
+    if (category == works[i].category.name) {
+      let figure = document.createElement("figure");
+      let img = document.createElement("img");
+      let figcaption = document.createElement("figcaption");
+      img.src = works[i].imageUrl;
+      img.alt = works[i].title;
+      figcaption.textContent = works[i].title;
+      figure.appendChild(img);
+      figure.appendChild(figcaption);
+      document.querySelector(".gallery").appendChild(figure);
+    }
+  }
+}
+
+/*
 object.addEventListener("click", () => {
   displayCategory(1);
   //colorer la catégorie sélectionnée
@@ -143,7 +144,7 @@ hotel.addEventListener("click", () => {
 all.addEventListener("click", () => {
   displayCategory();
   highlightCategory(all);
-});
+});*/
 
 async function modificationUser() {
   //ajout d'un event listener sur icone fontawesome pen to square
@@ -396,7 +397,7 @@ formImg.addEventListener("submit", async (e) => {
 });
 
 //fonction pour changer photos du modal en fonction de ce qu'affiche la gallerie
-async function changePhotosModal(...category) {
+async function changePhotosModal() {
   //suppression des photos du modal
   document.querySelector(".photos").remove();
   //création d'une nouvelle div pour les photos du modal
@@ -407,41 +408,17 @@ async function changePhotosModal(...category) {
     .querySelector(".modal")
     .insertBefore(newPhotos, document.querySelector("hr"));
   // boucle pour afficher les photos du modal
-  for (let i = 0; i < numberofWorks; i++) {
-    // afficher tous les travaux si aucun paramètre n'est passé
+  for (let i = 0; i < works.length; i++) {
     if (category.length === 0) {
       let figure = document.createElement("figure");
       let img = document.createElement("img");
       let figcaption = document.createElement("figcaption");
-      let trash = document.createElement("i");
-      trash.classList.add("fas", "fa-trash-alt");
-      trash.id = idWorks[i];
-      img.src = imageUrlWorks[i];
-      img.alt = titleWorks[i];
-      figcaption.textContent = "éditer";
-      figure.appendChild(trash);
+      img.src = works[i].imageUrl;
+      img.alt = works[i].title;
+      figcaption.textContent = works[i].title;
       figure.appendChild(img);
       figure.appendChild(figcaption);
       newPhotos.appendChild(figure);
-    } else {
-      // afficher les travaux selon la ou les catégories passées en paramètre
-      for (let j = 0; j < category.length; j++) {
-        if (categoryWorks[i] === category[j]) {
-          let figure = document.createElement("figure");
-          let img = document.createElement("img");
-          let figcaption = document.createElement("figcaption");
-          let trash = document.createElement("i");
-          trash.classList.add("fas", "fa-trash-alt");
-          trash.id = idWorks[i];
-          img.src = imageUrlWorks[i];
-          img.alt = titleWorks[i];
-          figcaption.textContent = "éditer";
-          figure.appendChild(trash);
-          figure.appendChild(img);
-          figure.appendChild(figcaption);
-          newPhotos.appendChild(figure);
-        }
-      }
     }
   }
   deleteWork();
