@@ -1,12 +1,7 @@
 const formImg = document.querySelector(".form-image");
-const all = document.querySelector(".all");
-const object = document.querySelector(".object");
-const tenement = document.querySelector(".tenement");
-const hotel = document.querySelector(".hotel");
 const modal = document.querySelector(".modal");
 const modalAdd = document.querySelector(".modal-add");
 localStorage.getItem("token");
-let typeClass = "all";
 let works;
 let categories;
 
@@ -74,11 +69,53 @@ async function displayGallery() {
     figure.appendChild(figcaption);
     gallery.appendChild(figure);
   }
-  changePhotosModal(...category);
+  changePhotosModal();
 }
 
 //appel de la fonction pour afficher tous les travaux
-fetchWorks();
+fetchWorks().then(() => {
+  //vérifier si l'utilisateur est connecté
+  if (localStorage.getItem("token")) {
+    //si oui, afficher logout au lieu de login
+    let login = document.querySelector(".login");
+    login.textContent = "logout";
+    login.href = "index.html";
+    //afficher modifier au lieu de project-filter
+    let projectFilter = document.querySelector(".project-filter");
+    projectFilter.remove();
+    let modifier = document.createElement("p");
+    modifier.classList.add("modification");
+    modifier.textContent = "Modifier";
+    let portfolio = document.querySelector("#portfolio");
+    portfolio.insertBefore(modifier, portfolio.childNodes[2]);
+    //aficher avant modifier l'icone fontawesome pen to square
+    let pen = document.createElement("i");
+    pen.classList.add("fas", "fa-pen-to-square");
+    portfolio.insertBefore(pen, portfolio.childNodes[2]);
+    //ajout d'un lien avec texte modifier et icone fontawesome à la figure dans la section presentation
+    let introduction = document.querySelector("#introduction figure");
+    let modification = document.createElement("p");
+    modification.classList.add("modification");
+    modification.textContent = "Modifier";
+    introduction.appendChild(modification);
+    let pen2 = document.createElement("i");
+    pen2.classList.add("fas", "fa-pen-to-square");
+    introduction.appendChild(pen2);
+    //ajout d'un event listener sur le bouton logout
+    login.addEventListener("click", () => {
+      localStorage.removeItem("token");
+      window.location.reload();
+    });
+    //appel de la fonction pour modifier un travail
+    modificationUser();
+
+    //si oui, montrer div edit
+    let edit = document.querySelector(".edit");
+    edit.style.display = "flex";
+    let header = document.querySelector(".header");
+    header.style.marginTop = "90px";
+  }
+});
 
 /*fonction pour les event listeners sur les filtres*/
 async function addEventListenerToFilters() {
@@ -136,48 +173,6 @@ async function modificationUser() {
       deleteAllWorks();
     });
   });
-}
-
-//vérifier si l'utilisateur est connecté
-if (localStorage.getItem("token")) {
-  //si oui, afficher logout au lieu de login
-  let login = document.querySelector(".login");
-  login.textContent = "logout";
-  login.href = "index.html";
-  //afficher modifier au lieu de project-filter
-  let projectFilter = document.querySelector(".project-filter");
-  projectFilter.remove();
-  let modifier = document.createElement("p");
-  modifier.classList.add("modification");
-  modifier.textContent = "Modifier";
-  let portfolio = document.querySelector("#portfolio");
-  portfolio.insertBefore(modifier, portfolio.childNodes[2]);
-  //aficher avant modifier l'icone fontawesome pen to square
-  let pen = document.createElement("i");
-  pen.classList.add("fas", "fa-pen-to-square");
-  portfolio.insertBefore(pen, portfolio.childNodes[2]);
-  //ajout d'un lien avec texte modifier et icone fontawesome à la figure dans la section presentation
-  let introduction = document.querySelector("#introduction figure");
-  let modification = document.createElement("p");
-  modification.classList.add("modification");
-  modification.textContent = "Modifier";
-  introduction.appendChild(modification);
-  let pen2 = document.createElement("i");
-  pen2.classList.add("fas", "fa-pen-to-square");
-  introduction.appendChild(pen2);
-  //ajout d'un event listener sur le bouton logout
-  login.addEventListener("click", () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  });
-  //appel de la fonction pour modifier un travail
-  modificationUser();
-
-  //si oui, montrer div edit
-  let edit = document.querySelector(".edit");
-  edit.style.display = "flex";
-  let header = document.querySelector(".header");
-  header.style.marginTop = "90px";
 }
 
 modal.addEventListener("click", (e) => {
@@ -295,80 +290,29 @@ async function deleteAllWorks() {
 
 formImg.addEventListener("submit", async (e) => {
   e.preventDefault();
-  let error;
-  let file = document.querySelector("#image").files[0];
-  let limit = 4000000;
-  let errorEmpty = document.querySelector(".errorEmpty");
-  console.log(errorEmpty);
-  if (errorEmpty) {
-    errorEmpty.remove();
-  }
-  if (
-    file === undefined ||
-    document.querySelector("#title").value === "" ||
-    document.querySelector("#category").value === ""
-  ) {
-    // afficher message d'erreur en rouge en dessous du formulaire
-    error = document.createElement("p");
-    error.textContent = "Veuillez remplir tous les champs";
-    error.style.color = "red";
-    error.classList.add("errorEmpty");
-    document.querySelector(".modal-add").appendChild(error);
-  } else {
-    let size = file.size / 1024;
-    // supprimer message d'erreur s'il existe
-    let precedentError = document.querySelector(".modal-add p");
-    if (precedentError) {
-      precedentError.remove();
-    }
-    // cas où le fichier est trop lourd
-    if (size > limit) {
-      // afficher message d'erreur en rouge en dessous du formulaire
-      error = document.createElement("p");
-      error.textContent = "Le fichier est trop lourd";
-      error.style.color = "red";
-      document.querySelector(".modal-add").appendChild(error);
-    }
-    // cas où le fichier n'est pas un png ou jpg
-    if (file.type !== "image/png" && file.type !== "image/jpeg") {
-      // afficher message d'erreur en rouge en dessous du formulaire
-      error = document.createElement("p");
-      error.textContent = "Le fichier doit être un png ou jpg";
-      error.style.color = "red";
-      document.querySelector(".modal-add").appendChild(error);
-    } else {
-      const file = document.querySelector("#image").files[0];
-      const formData = new FormData();
-      let imageUrl = file;
-      formData.append("image", file);
-      let title = document.querySelector("#title").value;
-      formData.append("title", title);
-      let category = document.querySelector("#category").value;
-      let categoryId = findIdCategory(category);
-      formData.append("category", categoryId);
-      const response = await fetch("http://localhost:5678/api/works", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: formData,
-      });
-      const json = await response.json();
-      document.querySelector(".modal-add").close();
-      modalAdd.style.display = "none";
-      window.location.reload();
-    }
-  }
-
-  //afficher paragraphe requirement si le champ image est vide
-  if (
-    document.querySelector("#image").value === "" &&
-    !document.querySelector(".errorEmpty")
-  ) {
-    let typeFile = document.createElement("p");
-    typeFile.textContent = "jpg, png : 4mo max";
-    typeFile.classList.add("requirement");
-    document.querySelector(".photo-to-add").appendChild(typeFile);
+  // vérifier si le bouton est avec la classe green
+  if (document.querySelector(".validation-add").classList.contains("green")) {
+    const file = document.querySelector("#image").files[0];
+    const formData = new FormData();
+    formData.append("image", file);
+    let title = document.querySelector("#title").value;
+    formData.append("title", title);
+    let category = document.querySelector("#category").value;
+    //fonction pour l'id de la catégorie
+    let categoryId = findIdCategory(category);
+    formData.append("category", category);
+    console.log(file, title, categoryId);
+    const response = await fetch("http://localhost:5678/api/works", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: formData,
+    });
+    const json = await response.json();
+    document.querySelector(".modal-add").close();
+    modalAdd.style.display = "none";
+    displayGallery();
   }
 });
 
@@ -385,19 +329,30 @@ async function changePhotosModal() {
     .insertBefore(newPhotos, document.querySelector("hr"));
   // boucle pour afficher les photos du modal
   for (let i = 0; i < works.length; i++) {
-    if (category.length === 0) {
-      let figure = document.createElement("figure");
-      let img = document.createElement("img");
-      let figcaption = document.createElement("figcaption");
-      img.src = works[i].imageUrl;
-      img.alt = works[i].title;
-      figcaption.textContent = works[i].title;
-      figure.appendChild(img);
-      figure.appendChild(figcaption);
-      newPhotos.appendChild(figure);
-    }
+    let figure = document.createElement("figure");
+    let img = document.createElement("img");
+    let figcaption = document.createElement("figcaption");
+    let trash = document.createElement("i");
+    trash.classList.add("fas", "fa-trash-alt");
+    trash.id = works[i].id;
+    img.src = works[i].imageUrl;
+    img.alt = works[i].title;
+    figcaption.textContent = "éditer";
+    figure.appendChild(trash);
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    newPhotos.appendChild(figure);
   }
   deleteWork();
+}
+
+//fonction pour trouver l'id de la catégorie
+async function findIdCategory(category) {
+  for (let i = 0; i < categories.length; i++) {
+    if (category === categories[i].name) {
+      return categories[i].id;
+    }
+  }
 }
 
 async function addEventListenerToLoading() {
@@ -424,3 +379,25 @@ async function addEventListenerToLoading() {
     img.classList.add("chosen-image");
   });
 }
+
+//fonction au changement du formulaire pour mettre en vert le bouton submit
+document.querySelector(".form-image").addEventListener("change", () => {
+  let file = document.querySelector("#image").files[0];
+  let limit = 4000000;
+  let size = file.size / 1024;
+  if (
+    //si tous les champs sont remplis et que le fichier est valide et que a taille est inférieure à 4mo
+    file !== undefined &&
+    document.querySelector("#title").value !== "" &&
+    document.querySelector("#category").value !== "" &&
+    size < limit &&
+    (file.type === "image/png" || file.type === "image/jpeg")
+  ) {
+    //changer couleur du bouton submit
+    document.querySelector(".validation-add").style.backgroundColor = "#1D6154";
+    document.querySelector(".validation-add").classList.add("green");
+  } else {
+    document.querySelector(".validation-add").style.backgroundColor = "#A7A7A7";
+    document.querySelector(".validation-add").classList.remove("green");
+  }
+});
