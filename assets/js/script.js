@@ -1,6 +1,7 @@
 const formImg = document.querySelector(".form-image");
 const modal = document.querySelector(".modal");
 const modalAdd = document.querySelector(".modal-add");
+const modals = document.querySelectorAll(".modal, .modal-add");
 localStorage.getItem("token");
 let works;
 let categories;
@@ -175,33 +176,19 @@ async function modificationUser() {
   });
 }
 
-modal.addEventListener("click", (e) => {
-  const modalDimensions = modal.getBoundingClientRect();
-  if (
-    e.clientX < modalDimensions.left ||
-    e.clientX > modalDimensions.right ||
-    e.clientY < modalDimensions.top ||
-    e.clientY > modalDimensions.bottom
-  ) {
-    modal.close();
-    modal.style.display = "none";
-  }
-});
-
-//ajout d'un event listener en dehors de la modal add
-modalAdd.addEventListener("click", (e) => {
-  const modalDimensions = document
-    .querySelector(".modal-add")
-    .getBoundingClientRect();
-  if (
-    e.clientX < modalDimensions.left ||
-    e.clientX > modalDimensions.right ||
-    e.clientY < modalDimensions.top ||
-    e.clientY > modalDimensions.bottom
-  ) {
-    document.querySelector(".modal-add").close();
-    modalAdd.style.display = "none";
-  }
+modals.forEach((modal) => {
+  modal.addEventListener("click", (e) => {
+    const modalDimensions = modal.getBoundingClientRect();
+    if (
+      e.clientX < modalDimensions.left ||
+      e.clientX > modalDimensions.right ||
+      e.clientY < modalDimensions.top ||
+      e.clientY > modalDimensions.bottom
+    ) {
+      modal.close();
+      modal.style.display = "none";
+    }
+  });
 });
 
 //ajout d'un event listener sur la croix de la modal
