@@ -12,8 +12,6 @@ async function fetchWorks() {
   // récupérer la liste des categories
   const response2 = await fetch("http://localhost:5678/api/categories");
   categories = await response2.json();
-  // création des filtres puis affichage des travaux dans la gallerie
-  createFilters();
   displayGallery();
   addEventListenerToFilters();
 }
@@ -74,6 +72,8 @@ async function displayGallery() {
 
 //appel de la fonction pour afficher tous les travaux
 fetchWorks().then(() => {
+  // création des filtres puis affichage des travaux dans la gallerie
+  createFilters();
   //vérifier si l'utilisateur est connecté
   if (localStorage.getItem("token")) {
     //si oui, afficher logout au lieu de login
@@ -258,6 +258,7 @@ async function deleteWork() {
       // fermer la modal
       document.querySelector(".modal").close();
       modal.style.display = "none";
+      fetchWorks();
     });
   });
 }
@@ -299,9 +300,8 @@ formImg.addEventListener("submit", async (e) => {
     formData.append("title", title);
     let category = document.querySelector("#category").value;
     //fonction pour l'id de la catégorie
-    let categoryId = findIdCategory(category);
-    formData.append("category", category);
-    console.log(file, title, categoryId);
+    let categoryId = await findIdCategory(category);
+    formData.append("category", categoryId);
     const response = await fetch("http://localhost:5678/api/works", {
       method: "POST",
       headers: {
@@ -312,7 +312,7 @@ formImg.addEventListener("submit", async (e) => {
     const json = await response.json();
     document.querySelector(".modal-add").close();
     modalAdd.style.display = "none";
-    displayGallery();
+    fetchWorks();
   }
 });
 
