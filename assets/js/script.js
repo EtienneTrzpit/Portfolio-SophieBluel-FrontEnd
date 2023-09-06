@@ -14,7 +14,6 @@ async function fetchWorks() {
   const response2 = await fetch("http://localhost:5678/api/categories");
   categories = await response2.json();
   displayGallery();
-  addEventListenerToFilters();
 }
 
 // fonction pour créer les filtres
@@ -38,6 +37,7 @@ async function createFilters() {
     li.textContent = categories[i].name;
     list.appendChild(li);
   }
+  addEventListenerToFilters();
 }
 
 async function highlightCategory(type) {
@@ -236,7 +236,6 @@ async function deleteWork() {
             "Content-Type": "application/json",
           },
         }
-        // supprimer le travail dans le DOM
       );
       // supprimer le travail dans le DOM
       if (document.querySelectorAll(".gallery figure")[i - 1]) {
