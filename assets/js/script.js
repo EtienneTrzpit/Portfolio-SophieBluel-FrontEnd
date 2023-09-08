@@ -14,7 +14,6 @@ async function fetchWorks() {
   const response2 = await fetch("http://localhost:5678/api/categories");
   categories = await response2.json();
   displayGallery();
-  addEventListenerToFilters();
 }
 
 // fonction pour créer les filtres
@@ -38,6 +37,7 @@ async function createFilters() {
     li.textContent = categories[i].name;
     list.appendChild(li);
   }
+  addEventListenerToFilters();
 }
 
 async function highlightCategory(type) {
@@ -236,7 +236,6 @@ async function deleteWork() {
             "Content-Type": "application/json",
           },
         }
-        // supprimer le travail dans le DOM
       );
       // supprimer le travail dans le DOM
       if (document.querySelectorAll(".gallery figure")[i - 1]) {
@@ -300,6 +299,16 @@ formImg.addEventListener("submit", async (e) => {
     document.querySelector(".modal-add").close();
     modalAdd.style.display = "none";
     fetchWorks();
+  } else {
+    //afficher un message d'erreur
+    if (!document.querySelector(".errorForm")) {
+      console.log("pas de requirement");
+      let errorForm = document.createElement("p");
+      errorForm.classList.add("errorForm");
+      errorForm.textContent =
+        "Veuillez remplir tous les champs et choisir une image valide";
+      document.querySelector(".form-image").appendChild(errorForm);
+    }
   }
 });
 
@@ -371,20 +380,17 @@ async function addEventListenerToLoading() {
 document.querySelector(".form-image").addEventListener("change", () => {
   let file = document.querySelector("#image").files[0];
   let limit = 4000000;
-  let size = file.size / 1024;
   if (
     //si tous les champs sont remplis et que le fichier est valide et que a taille est inférieure à 4mo
     file !== undefined &&
     document.querySelector("#title").value !== "" &&
     document.querySelector("#category").value !== "" &&
-    size < limit &&
+    file.size / 1024 < limit &&
     (file.type === "image/png" || file.type === "image/jpeg")
   ) {
     //changer couleur du bouton submit
-    document.querySelector(".validation-add").style.backgroundColor = "#1D6154";
     document.querySelector(".validation-add").classList.add("green");
   } else {
-    document.querySelector(".validation-add").style.backgroundColor = "#A7A7A7";
     document.querySelector(".validation-add").classList.remove("green");
   }
 });

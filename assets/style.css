@@ -699,3 +699,12 @@ input[type="file"] {
 #introduction .fa-pen-to-square {
   color: black;
 }
+
+.validation-add.green {
+  background-color: #1d6154;
+}
+
+.errorForm {
+  color: red;
+  margin-top: 2em;
+}
