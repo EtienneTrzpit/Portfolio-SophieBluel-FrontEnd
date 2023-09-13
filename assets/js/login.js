@@ -28,7 +28,6 @@ async function checkInput() {
   const passwordValue = password.value.trim();
 
   if (emailValue === "" || passwordValue === "") {
-    console.log("empty");
     // appel de la fonction pour afficher le message d'erreur
     displayError();
     return false;
@@ -39,11 +38,9 @@ async function checkInput() {
     ) ||
     !passwordValue.match(/^[a-zA-Z0-9._-]{6,}$/)
   ) {
-    console.log("special characters");
     displayError();
     return false;
   } else {
-    console.log("success");
     return true;
   }
 }
@@ -65,7 +62,6 @@ async function checkResponse(response) {
   // vérifier promiseResult de la réponse du serveur
   const promiseResult = await response;
   if (promiseResult.status === 200) {
-    console.log("success2");
     window.location.href = "index.html";
     // récupérer le token
     const data = await promiseResult.json();

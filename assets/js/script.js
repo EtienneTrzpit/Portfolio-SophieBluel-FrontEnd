@@ -2,18 +2,48 @@ const formImg = document.querySelector(".form-image");
 const modal = document.querySelector(".modal");
 const modalAdd = document.querySelector(".modal-add");
 const modals = document.querySelectorAll(".modal, .modal-add");
-localStorage.getItem("token");
+const WORKS_API_URL = "http://localhost:5678/api/works";
+const CATEGORIES_API_URL = "http://localhost:5678/api/categories";
+let token = localStorage.getItem("token");
 let works;
 let categories;
 
-//fonction pour récupérer les travaux de l'utilisateur et stockage des données par des variables
+loadUserWorks();
+
+// Fonction principale pour charger les travaux de l'utilisateur
+async function loadUserWorks() {
+  try {
+    works = await fetchWorks();
+    categories = await fetchCategories();
+    displayGallery();
+    createFilters();
+    if (token) {
+      // Si l'utilisateur est connecté, effectuez d'autres actions
+      setupLoggedInUser();
+    }
+  } catch (error) {
+    // Gérer les erreurs ici
+    console.error("Error loading user works:", error);
+  }
+}
+
+//fonction pour récupérer les travaux de l'utilisateur
 async function fetchWorks() {
-  const response = await fetch("http://localhost:5678/api/works");
-  works = await response.json();
-  // récupérer la liste des categories
-  const response2 = await fetch("http://localhost:5678/api/categories");
-  categories = await response2.json();
-  displayGallery();
+  return await fetchData(WORKS_API_URL);
+}
+
+// récupérer la liste des categories
+async function fetchCategories() {
+  return await fetchData(CATEGORIES_API_URL);
+}
+
+// Fonction pour effectuer une requête HTTP GET
+async function fetchData(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Error fetching data from API");
+  }
+  return await response.json();
 }
 
 // fonction pour créer les filtres
@@ -38,6 +68,47 @@ async function createFilters() {
     list.appendChild(li);
   }
   addEventListenerToFilters();
+}
+
+async function setupLoggedInUser() {
+  //si oui, afficher logout au lieu de login
+  let login = document.querySelector(".login");
+  login.textContent = "logout";
+  login.href = "index.html";
+  //afficher modifier au lieu de project-filter
+  let projectFilter = document.querySelector(".project-filter");
+  projectFilter.remove();
+  let modifier = document.createElement("p");
+  modifier.classList.add("modification");
+  modifier.textContent = "Modifier";
+  let portfolio = document.querySelector("#portfolio");
+  portfolio.insertBefore(modifier, portfolio.childNodes[2]);
+  //aficher avant modifier l'icone fontawesome pen to square
+  let pen = document.createElement("i");
+  pen.classList.add("fas", "fa-pen-to-square");
+  portfolio.insertBefore(pen, portfolio.childNodes[2]);
+  //ajout d'un lien avec texte modifier et icone fontawesome à la figure dans la section presentation
+  let introduction = document.querySelector("#introduction figure");
+  let modification = document.createElement("p");
+  modification.classList.add("modification");
+  modification.textContent = "Modifier";
+  introduction.appendChild(modification);
+  let pen2 = document.createElement("i");
+  pen2.classList.add("fas", "fa-pen-to-square");
+  introduction.appendChild(pen2);
+  //ajout d'un event listener sur le bouton logout
+  login.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  });
+  //appel de la fonction pour modifier un travail
+  modificationUser();
+
+  //si oui, montrer div edit
+  let edit = document.querySelector(".edit");
+  edit.style.display = "flex";
+  let header = document.querySelector(".header");
+  header.style.marginTop = "90px";
 }
 
 async function highlightCategory(type) {
@@ -70,53 +141,6 @@ async function displayGallery() {
   }
   changePhotosModal();
 }
-
-//appel de la fonction pour afficher tous les travaux
-fetchWorks().then(() => {
-  // création des filtres puis affichage des travaux dans la gallerie
-  createFilters();
-  //vérifier si l'utilisateur est connecté
-  if (localStorage.getItem("token")) {
-    //si oui, afficher logout au lieu de login
-    let login = document.querySelector(".login");
-    login.textContent = "logout";
-    login.href = "index.html";
-    //afficher modifier au lieu de project-filter
-    let projectFilter = document.querySelector(".project-filter");
-    projectFilter.remove();
-    let modifier = document.createElement("p");
-    modifier.classList.add("modification");
-    modifier.textContent = "Modifier";
-    let portfolio = document.querySelector("#portfolio");
-    portfolio.insertBefore(modifier, portfolio.childNodes[2]);
-    //aficher avant modifier l'icone fontawesome pen to square
-    let pen = document.createElement("i");
-    pen.classList.add("fas", "fa-pen-to-square");
-    portfolio.insertBefore(pen, portfolio.childNodes[2]);
-    //ajout d'un lien avec texte modifier et icone fontawesome à la figure dans la section presentation
-    let introduction = document.querySelector("#introduction figure");
-    let modification = document.createElement("p");
-    modification.classList.add("modification");
-    modification.textContent = "Modifier";
-    introduction.appendChild(modification);
-    let pen2 = document.createElement("i");
-    pen2.classList.add("fas", "fa-pen-to-square");
-    introduction.appendChild(pen2);
-    //ajout d'un event listener sur le bouton logout
-    login.addEventListener("click", () => {
-      localStorage.removeItem("token");
-      window.location.reload();
-    });
-    //appel de la fonction pour modifier un travail
-    modificationUser();
-
-    //si oui, montrer div edit
-    let edit = document.querySelector(".edit");
-    edit.style.display = "flex";
-    let header = document.querySelector(".header");
-    header.style.marginTop = "90px";
-  }
-});
 
 /*fonction pour les event listeners sur les filtres*/
 async function addEventListenerToFilters() {
@@ -227,16 +251,13 @@ async function deleteWork() {
   document.querySelectorAll(".fa-trash-alt").forEach((trash) => {
     i++;
     trash.addEventListener("click", async () => {
-      const response = await fetch(
-        `http://localhost:5678/api/works/${trash.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${WORKS_API_URL}/${trash.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
       // supprimer le travail dans le DOM
       if (document.querySelectorAll(".gallery figure")[i - 1]) {
         document.querySelectorAll(".gallery figure")[i - 1].remove();
@@ -253,24 +274,21 @@ async function deleteWork() {
 async function deleteAllWorks() {
   document.querySelector(".delete").addEventListener("click", async () => {
     // récpérer tous les id des travaux
-    const response = await fetch("http://localhost:5678/api/works");
+    const response = await fetch(WORKS_API_URL);
     const json = await response.json();
     Object.entries(json).forEach(async ([key, value]) => {
       // supprimer le travail dans la base de données
-      const response = await fetch(
-        `http://localhost:5678/api/works/${value.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`${WORKS_API_URL}/${value.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify({
-            id: value.id,
-          }),
-        }
-      );
+        body: JSON.stringify({
+          id: value.id,
+        }),
+      });
     });
   });
 }
@@ -288,7 +306,7 @@ formImg.addEventListener("submit", async (e) => {
     //fonction pour l'id de la catégorie
     let categoryId = await findIdCategory(category);
     formData.append("category", categoryId);
-    const response = await fetch("http://localhost:5678/api/works", {
+    const response = await fetch(WORKS_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -298,11 +316,12 @@ formImg.addEventListener("submit", async (e) => {
     const json = await response.json();
     document.querySelector(".modal-add").close();
     modalAdd.style.display = "none";
-    fetchWorks();
+    works = fetchWorks().then(() => {
+      loadUserWorks();
+    });
   } else {
     //afficher un message d'erreur
     if (!document.querySelector(".errorForm")) {
-      console.log("pas de requirement");
       let errorForm = document.createElement("p");
       errorForm.classList.add("errorForm");
       errorForm.textContent =
